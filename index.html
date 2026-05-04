@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Stella Matutina</title>
+<style>
+  @font-face {
+    font-family: 'Tofth Grotesk Mono';
+    src: url('assets/Tofth-Grotesk-Mono.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Tofth Grotesk Semi Mono';
+    src: url('assets/Tofth-Grotesk-Semi-Mono-Negative-Tracking.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Tofth Grotesk Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ============ B&W AERIAL BACKGROUND ============ */
+  .bg-stage {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    background: #000;
+  }
+  /* Tiny placeholder is rendered as a blurred-up background, so the screen is
+     never blank while the full image streams in. */
+  .bg-placeholder {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(24px);
+    transform: scale(1.08);
+    transition: opacity 0.6s ease;
+  }
+  .bg-stage img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  .bg-stage img.loaded { opacity: 1; }
+  .bg-stage img.loaded ~ .bg-placeholder,
+  .bg-stage.ready .bg-placeholder { opacity: 0; }
+  /* Subtle vignette to anchor the top-left text */
+  .bg-stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 38%, rgba(0,0,0,0) 65%);
+    pointer-events: none;
+  }
+
+  /* ============ TOP-LEFT TEXT BLOCK ============ */
+  .corner {
+    position: fixed;
+    top: 38px;
+    left: 42px;
+    z-index: 3;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fade 1.4s ease 0.2s both;
+  }
+  @keyframes fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .corner .title {
+    font-family: 'Tofth Grotesk Semi Mono', 'Tofth Grotesk Mono', monospace;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    font-weight: 400;
+    text-shadow: 0 1px 14px rgba(0,0,0,0.5);
+  }
+  .corner .place {
+    font-family: 'Tofth Grotesk Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+  }
+  .corner .about {
+    margin-top: 18px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Tofth Grotesk Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0.9;
+    transition: opacity 0.2s ease, gap 0.25s ease;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+  }
+  .corner .about::after {
+    content: '';
+    width: 22px;
+    height: 1px;
+    background: rgba(255,255,255,0.75);
+    transition: width 0.25s ease;
+  }
+  .corner .about:hover { opacity: 1; gap: 16px; }
+  .corner .about:hover::after { width: 32px; }
+  .corner .about:focus-visible { outline: 1px dashed rgba(255,255,255,0.8); outline-offset: 6px; }
+  .corner.hidden {
+    opacity: 0;
+    filter: blur(8px);
+    pointer-events: none;
+    transition: opacity 0.35s ease, filter 0.35s ease;
+  }
+
+  /* ============ MODAL ============ */
+  .modal-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 11;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    pointer-events: none;
+  }
+
+  .modal {
+    pointer-events: none;
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    color: #fff;
+  }
+  .modal.open { pointer-events: auto; }
+
+  @property --b {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0px;
+  }
+  .modal-blur {
+    position: absolute;
+    inset: -120px -140px;
+    background: transparent;
+    --b: 0px;
+    backdrop-filter: blur(var(--b));
+    -webkit-backdrop-filter: blur(var(--b));
+    transition: --b 0.9s ease;
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 58% 62% at 50% 50%,
+      #000 0%,
+      rgba(0,0,0,0.92) 42%,
+      rgba(0,0,0,0.65) 62%,
+      rgba(0,0,0,0.3) 80%,
+      rgba(0,0,0,0.1) 92%,
+      transparent 100%);
+            mask-image: radial-gradient(ellipse 58% 62% at 50% 50%,
+      #000 0%,
+      rgba(0,0,0,0.92) 42%,
+      rgba(0,0,0,0.65) 62%,
+      rgba(0,0,0,0.3) 80%,
+      rgba(0,0,0,0.1) 92%,
+      transparent 100%);
+  }
+  .modal.open .modal-blur { --b: 26px; }
+
+  .modal-content {
+    position: relative;
+    padding: 36px 36px 32px;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.45);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease 0.15s, transform 0.6s ease 0.15s;
+  }
+  .modal.open .modal-content { opacity: 1; transform: none; }
+
+  .modal-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    font-family: 'Tofth Grotesk Mono', monospace;
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+    opacity: 0.7;
+    z-index: 5;
+    /* Halo so the × is readable even if it sits over a bright part of the photo. */
+    text-shadow: 0 0 12px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.6);
+  }
+  .modal-close:hover { opacity: 1; }
+
+  .modal-image {
+    width: 100%;
+    aspect-ratio: 1 / 1.12;
+    overflow: hidden;
+    background: transparent;
+    position: relative;
+    border-radius: 14px;
+  }
+  .modal-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .modal-body {
+    padding-top: 28px;
+    font-family: 'Tofth Grotesk Mono', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.92);
+    text-wrap: pretty;
+  }
+
+  .modal-footer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Tofth Grotesk Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+  .modal-footer .label {
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+  }
+  .modal-footer a {
+    color: #fff;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: opacity 0.2s ease;
+  }
+  .modal-footer a:hover { opacity: 0.7; }
+
+  /* ============ MOBILE ============ */
+  @media (max-width: 600px) {
+    .corner { top: 24px; left: 22px; }
+    .corner .title { font-size: 22px; }
+    .corner .place { font-size: 11px; letter-spacing: 0.16em; }
+    .modal { max-width: 100%; }
+    .modal-content {
+      /* Extra top padding so the close × sits clear above the photo. */
+      padding: 48px 24px 26px;
+    }
+    .modal-blur { inset: -80px -80px; }
+    .modal-close {
+      top: 8px;
+      right: 8px;
+    }
+    .modal-footer { flex-direction: column; align-items: flex-start; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- B&W aerial background -->
+  <div class="bg-stage" id="bgStage" aria-hidden="true">
+    <img id="bgImg" src="assets/bw-aerial.jpg" alt="" decoding="async" fetchpriority="high" />
+    <div class="bg-placeholder" id="bgPlaceholder"></div>
+  </div>
+
+  <!-- Top-left text block -->
+  <div class="corner" id="corner">
+    <div class="title">Stella Matutina</div>
+    <div class="place">Lake Lucerne, Switzerland</div>
+    <button class="about" id="aboutBtn" aria-haspopup="dialog">About</button>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-wrap" id="modalWrap" aria-hidden="true">
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-blur" aria-hidden="true"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+
+        <div class="modal-image">
+          <img src="assets/desk-view.jpg" alt="A desk by an open window overlooking Lake Lucerne" loading="lazy" decoding="async" />
+        </div>
+
+        <div class="modal-body" id="modalTitle">
+          A quiet peninsula on Lake Lucerne — a place to think, read, and look out at the water. Stella Matutina is a small residence offering rooms with a view, a desk, and the time to use them well.
+        </div>
+
+        <div class="modal-footer">
+          <span class="label">Inquiries</span>
+          <a href="mailto:info@stella.earth">info@stella.earth</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ── Background: show a tiny blurred placeholder instantly, fade to the full
+  // image once it has fully decoded (prevents the line-by-line reveal). ──
+  var TINY_BG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAVACgDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAAYCAwQBBf/EACYQAAIBAwMDBAMAAAAAAAAAAAECAwAEEQUSIQYiQRMxUWEUocH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8ApWy9Daj7yfoYpg0yxuiwaF3RfJIpee1u4XLtqs0ZRcg7j3ZHit9hd6rCAkGrGX5WXu/ZFAzz293HaM6Osko9twxSjPLqnrsZXlU/QIFbp+pdbiRgI7Rz4JBH9qWl9WSGN01q0JbPa0EeRj7GaBdu725WNk9eXbnnuPNFO1i+ia3DKILfhcbgybTzRQZpNChebfHM6c5HnFXr09btndK/vnI4oooOv03ZMMGScjwC+ahbdM2sLhzPK2PBxRRQenBZ29kj/jxhN2Mn5xRRRQf/2Q==';
+  (function(){
+    var bgImg = document.getElementById('bgImg');
+    var ph = document.getElementById('bgPlaceholder');
+    var stage = document.getElementById('bgStage');
+    ph.style.backgroundImage = 'url("' + TINY_BG + '")';
+    function reveal(){
+      bgImg.classList.add('loaded');
+      stage.classList.add('ready');
+    }
+    if (bgImg.complete && bgImg.naturalWidth > 0) {
+      // Cached — still wait one frame so the placeholder paints.
+      requestAnimationFrame(reveal);
+    } else if (bgImg.decode) {
+      bgImg.decode().then(reveal).catch(function(){
+        bgImg.addEventListener('load', reveal, { once: true });
+      });
+    } else {
+      bgImg.addEventListener('load', reveal, { once: true });
+    }
+  })();
+
+  var aboutBtn = document.getElementById('aboutBtn');
+  var corner = document.getElementById('corner');
+  var modal = document.getElementById('modal');
+  var modalWrap = document.getElementById('modalWrap');
+  var closeBtn = document.getElementById('modalClose');
+
+  function openModal() {
+    corner.classList.add('hidden');
+    modal.classList.add('open');
+    modalWrap.setAttribute('aria-hidden', 'false');
+  }
+  function closeModal() {
+    modal.classList.remove('open');
+    corner.classList.remove('hidden');
+    modalWrap.setAttribute('aria-hidden', 'true');
+  }
+  aboutBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  modalWrap.addEventListener('click', function(e) {
+    if (e.target === modalWrap) closeModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>
