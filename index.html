@@ -144,10 +144,11 @@
     inset: 0;
     z-index: 11;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 24px;
+    padding: 40px 24px;
     pointer-events: none;
+    overflow-y: auto;
   }
 
   .modal {
@@ -156,6 +157,8 @@
     width: 100%;
     max-width: 480px;
     color: #fff;
+    margin-top: auto;
+    margin-bottom: auto;
   }
   .modal.open { pointer-events: auto; }
 
