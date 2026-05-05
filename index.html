@@ -149,7 +149,9 @@
     padding: 40px 24px;
     pointer-events: none;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
+  .modal-wrap.open { pointer-events: auto; }
 
   .modal {
     pointer-events: none;
@@ -374,10 +376,13 @@
   function openModal() {
     corner.classList.add('hidden');
     modal.classList.add('open');
+    modalWrap.classList.add('open');
     modalWrap.setAttribute('aria-hidden', 'false');
+    modalWrap.scrollTop = 0;
   }
   function closeModal() {
     modal.classList.remove('open');
+    modalWrap.classList.remove('open');
     corner.classList.remove('hidden');
     modalWrap.setAttribute('aria-hidden', 'true');
   }
