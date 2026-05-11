@@ -281,6 +281,22 @@
   }
   .modal-footer a:hover { opacity: 0.7; }
 
+  .place-link {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+  .place-link:hover { opacity: 0.7; }
+
+  .body-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: opacity 0.2s ease;
+  }
+  .body-link:hover { opacity: 0.7; }
+
   /* ============ MOBILE ============ */
   @media (max-width: 600px) {
     .corner { top: 24px; left: 22px; }
@@ -311,7 +327,7 @@
   <!-- Top-left text block -->
   <div class="corner" id="corner">
     <div class="title">Stella Matutina</div>
-    <div class="place">Lake Lucerne, Switzerland</div>
+    <div class="place"><a href="https://maps.app.goo.gl/kTwNNW23MgwFQ2BG6" target="_blank" rel="noopener" class="place-link">Lake Lucerne, Switzerland</a></div>
     <button class="about" id="aboutBtn" aria-haspopup="dialog">About</button>
   </div>
 
@@ -327,7 +343,7 @@
         </div>
 
         <div class="modal-body" id="modalTitle">
-          <p>A new experimental R&amp;D ecosystem and school set within a quiet peninsula on Lake Lucerne.</p>
+          <p>A new experimental R&amp;D ecosystem and school set within a <a href="https://maps.app.goo.gl/kTwNNW23MgwFQ2BG6" target="_blank" rel="noopener" class="body-link">quiet peninsula on Lake Lucerne</a>.</p>
           <p>The site spent the past two centuries under the care of The Sisters of Baldegg who started the region's first school for girls and designed an experimental convent with Marcel Breuer.</p>
           <p>We continue their legacy by engaging with discoveries across science and technology that reveal insufficiencies of existing disciplines or conceptual frames.</p>
           <p>Stella identifies these ruptures as the necessary sites from which to build productive interventions. We partner with our ecosystem of practitioners across philosophy, art, science and technology to apply the most relevant combination of methods.</p>
