@@ -170,22 +170,22 @@
     initial-value: 0px;
   }
   .modal-blur {
-    position: absolute;
-    inset: -120px -140px;
-    background: transparent;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0);
     --b: 0px;
     backdrop-filter: blur(var(--b));
     -webkit-backdrop-filter: blur(var(--b));
-    transition: --b 0.9s ease;
+    transition: --b 0.9s ease, background 0.9s ease;
     pointer-events: none;
-    -webkit-mask-image: radial-gradient(ellipse 58% 62% at 50% 50%,
+    -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 50%,
       #000 0%,
       rgba(0,0,0,0.92) 42%,
       rgba(0,0,0,0.65) 62%,
       rgba(0,0,0,0.3) 80%,
       rgba(0,0,0,0.1) 92%,
       transparent 100%);
-            mask-image: radial-gradient(ellipse 58% 62% at 50% 50%,
+            mask-image: radial-gradient(ellipse 70% 65% at 50% 50%,
       #000 0%,
       rgba(0,0,0,0.92) 42%,
       rgba(0,0,0,0.65) 62%,
@@ -193,7 +193,7 @@
       rgba(0,0,0,0.1) 92%,
       transparent 100%);
   }
-  .modal.open .modal-blur { --b: 26px; }
+  .modal.open .modal-blur { --b: 26px; background: rgba(0,0,0,0.25); }
 
   .modal-content {
     position: relative;
@@ -343,9 +343,9 @@
         </div>
 
         <div class="modal-body" id="modalTitle">
-          <p>Stella Matutina is a new research centre and school of practice set within a <a href="https://maps.app.goo.gl/kTwNNW23MgwFQ2BG6" target="_blank" rel="noopener" class="body-link">quiet peninsula on Lake Lucerne</a>. The site spent the past two centuries under the care of The Sisters of Baldegg who started the region's first school for girls and designed a nearby experimental convent with Marcel Breuer.</p>
+          <p>Stella Matutina is a new research centre and school of practice set within a <a href="https://maps.app.goo.gl/kTwNNW23MgwFQ2BG6" target="_blank" rel="noopener" class="body-link">quiet peninsula on Lake Lucerne</a>.<br><br>The site spent the past two centuries under the care of The Sisters of Baldegg who started the region's first school for girls and designed a nearby experimental convent with Marcel Breuer.</p>
           <p>Stella's next chapter is as an ecosystem that treats technology as a philosophical site: a place where civilizational concepts such as intelligence, value, and purpose are coming under strain.</p>
-          <p>Our response seeks to dissolve disciplinary boundaries to develop concrete technical, artistic, organisational experiments that engage with what is newly possible rather than rely on insufficient inherited concepts.<br>Through independent research and institutional partnerships, we give exceptional researchers, engineers, artists, entrepreneurs, and philanthropists what the work requires: resources, time, and companions.</p>
+          <p>Our response seeks to dissolve disciplinary boundaries to develop concrete technical, artistic, organisational experiments that engage with what is newly possible rather than rely on insufficient inherited concepts.<br><br>Through independent research and institutional partnerships, we give exceptional researchers, engineers, artists, entrepreneurs, and philanthropists what the work requires: resources, time, and companions.</p>
           <p>Together we name the philosophical stakes of new technologies, build prototypes to carry new concepts forward, and develop the tools, practices, and institutions that sustain them.</p>
           <p>We call this philosophical R&amp;D.</p>
         </div>
