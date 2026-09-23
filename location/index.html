@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Location — Stella Matutina</title>
+<link rel="stylesheet" href="../assets/gallery.css" />
+<script data-goatcounter="https://stellaearth.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<!-- Blurred aerial background -->
+<div class="bg-stage" aria-hidden="true">
+  <img id="bgImg" src="../assets/bw-aerial.jpg" alt="" decoding="async" fetchpriority="high" />
+</div>
+
+<!-- Top-left corner -->
+<div class="corner">
+  <a href="/" class="title">Stella Matutina</a>
+  <div class="place">Lake Lucerne, Switzerland</div>
+  <a href="/" class="nav-link">Home</a>
+</div>
+
+<!-- Intro + stacked photos -->
+<div class="photos" id="photoGrid">
+  <div class="intro">
+    <h1>Location</h1>
+    <p>Stella occupies a former convent and girls’ school in Hertenstein, on a <a href="https://maps.app.goo.gl/kTwNNW23MgwFQ2BG6" target="_blank" rel="noopener" class="body-link">quiet peninsula on Lake Lucerne</a>. For two centuries it was in the care of the Sisters of Baldegg, who founded the region’s first school for girls, pioneered international charity work, and built a modernist convent with Marcel Breuer. They understood that a new way of thinking requires a new way of living together; we inherit that understanding along with their house, which we are adapting for residential study, research, and gatherings.</p>
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-5.jpg" alt="Garden with lake view" loading="eager" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-3.jpg" alt="Exterior, summer" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-2.jpg" alt="Exterior, winter morning" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-1.jpg" alt="Corridor with arched ceiling" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-4.jpg" alt="Exterior from hillside" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-6.jpg" alt="Greenhouses" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-7.jpg" alt="Chapel interior" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-8.jpg" alt="Chapel with tall window" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="assets/photo-9.jpg" alt="Morning landscape path" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="../assets/desk-view.jpg" alt="Desk with lake view" loading="lazy" decoding="async" />
+  </div>
+  <div class="photo-item">
+    <img src="../assets/bw-aerial.jpg" alt="Aerial view of Lake Lucerne peninsula" loading="lazy" decoding="async" />
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lightbox-close" id="lbClose" aria-label="Close">×</button>
+  <button class="lightbox-nav prev" id="lbPrev" aria-label="Previous photo">‹</button>
+  <div class="lb-img-wrap">
+    <img id="lbImg" src="" alt="" />
+  </div>
+  <button class="lightbox-nav next" id="lbNext" aria-label="Next photo">›</button>
+  <div class="lightbox-counter" id="lbCounter"></div>
+</div>
+
+<script src="../assets/gallery.js"></script>
+</body>
+</html>
