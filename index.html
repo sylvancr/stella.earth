@@ -304,6 +304,12 @@
     .corner { top: 24px; left: 22px; }
     .corner .title { font-size: 22px; }
     .corner .place { font-size: 11px; letter-spacing: 0.16em; }
+    /* Keep About · Location · July 26 on one line down to 320px. */
+    .corner .nav { gap: 14px !important; }
+    .corner .about { letter-spacing: 0.24em; gap: 8px; }
+    .corner .about::after { width: 14px; }
+    .corner .about:hover { gap: 10px; }
+    .corner .about:hover::after { width: 20px; }
     .modal { max-width: 100%; }
     .modal-content {
       /* Extra top padding so the close × sits clear above the photo. */
@@ -331,10 +337,10 @@
   <div class="corner" id="corner">
     <div class="title">Stella Matutina</div>
     <div class="place"><a href="https://maps.app.goo.gl/kTwNNW23MgwFQ2BG6" target="_blank" rel="noopener" class="place-link">Lake Lucerne, Switzerland</a></div>
-    <div style="display:flex;flex-direction:row;flex-wrap:wrap;gap:12px 20px;align-items:center;margin-top:18px;">
+    <div class="nav" style="display:flex;flex-direction:row;flex-wrap:nowrap;gap:20px;align-items:center;margin-top:18px;white-space:nowrap;">
       <button class="about" id="aboutBtn" style="margin-top:0;" aria-haspopup="dialog">About</button>
       <a href="/location/" class="about" style="margin-top:0;">Location</a>
-      <a href="/summer/" class="about" style="margin-top:0;">Summer 2026</a>
+      <a href="/summer/" class="about" style="margin-top:0;">July 26</a>
     </div>
   </div>
 
