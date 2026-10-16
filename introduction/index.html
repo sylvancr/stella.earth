@@ -95,13 +95,7 @@
     cursor: pointer;
   }
   .gate button:disabled { opacity: 0.4; cursor: default; }
-  .gate .note {
-    margin-top: 16px;
-    font-size: 11px;
-    line-height: 1.6;
-    color: rgba(255,255,255,0.5);
-  }
-  .gate .error {
+    .gate .error {
     margin-top: 16px;
     font-size: 12px;
     color: #fff;
@@ -122,7 +116,7 @@
     align-items: center;
     justify-content: center;
     padding: 16px;
-    touch-action: pan-y;
+    touch-action: pan-y pinch-zoom;
     user-select: none;
     -webkit-user-select: none;
   }
@@ -194,6 +188,70 @@
   .bar button:disabled { opacity: 0.3; cursor: default; }
   .bar .count { font-variant-numeric: tabular-nums; }
   .bar .nav { display: flex; gap: 24px; }
+
+  /* ============ PHONE FEED ============ */
+  /* On phones the slides sit edge to edge in one native scroll: a vertical feed held
+     upright, and one slide per screen, swiped sideways, when turned. Pinch zoom is left on. */
+  .feed {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background: #000;
+  }
+  .feed::-webkit-scrollbar { display: none; }
+  .card {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #0b0b0b;
+  }
+  .frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    -webkit-user-drag: none;
+  }
+  .frame img.on { opacity: 1; }
+  .frame a.hot { position: absolute; display: block; }
+  @media (orientation: portrait) {
+    .feed {
+      flex-direction: column;
+      gap: 10px;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+      scroll-snap-type: y proximity;
+    }
+    .card { width: 100%; scroll-snap-align: center; }
+  }
+  @media (orientation: landscape) {
+    .feed {
+      flex-direction: row;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+    }
+    .card {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+    }
+    .frame { width: min(100vw, calc(100dvh * 16 / 9)); }
+  }
 </style>
 </head>
 <body>
@@ -208,7 +266,6 @@
       <button type="submit" id="go">Open</button>
     </div>
     <input class="hp" type="text" name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-    <p class="note">Stella sees who has opened the deck and how long each slide was viewed.</p>
     <p class="error" id="error" role="alert" hidden></p>
   </form>
 </section>
@@ -232,6 +289,8 @@
     </span>
   </div>
 </section>
+
+<section class="feed" id="feed" hidden></section>
 
 <script>
 (function () {
@@ -264,6 +323,8 @@
   };
 
   var KEY = 'stella-deck-email';
+  // Phones get the feed; tablets and computers get the one-slide viewer.
+  var PHONE = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 600;
   var $ = function (id) { return document.getElementById(id); };
 
   var session = null;
@@ -289,6 +350,7 @@
   // ---------- gate ----------
   function showGate(message) {
     $('viewer').hidden = true;
+    $('feed').hidden = true;
     $('gate').hidden = false;
     var saved = params.get('e') || load(KEY) || '';
     if (saved && !$('email').value) $('email').value = saved;
@@ -354,9 +416,94 @@
 
   function openViewer() {
     $('gate').hidden = true;
-    $('viewer').hidden = false;
     var fromHash = parseInt((location.hash || '').slice(1), 10);
-    go(fromHash >= 1 && fromHash <= count ? fromHash : 1);
+    var first = fromHash >= 1 && fromHash <= count ? fromHash : 1;
+    if (PHONE) return openFeed(first);
+    $('viewer').hidden = false;
+    go(first);
+  }
+
+  // ---------- phone feed ----------
+  function openFeed(first) {
+    var feed = $('feed');
+    feed.innerHTML = '';
+    feed.hidden = false;
+    current = first;
+    var cards = [];
+    for (var n = 1; n <= count; n++) {
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.n = n;
+      var frame = document.createElement('div');
+      frame.className = 'frame';
+      var img = document.createElement('img');
+      img.alt = 'Slide ' + n;
+      img.draggable = false;
+      frame.appendChild(img);
+      drawLinks(n, frame);
+      card.appendChild(frame);
+      feed.appendChild(card);
+      cards.push(card);
+    }
+
+    // Load slides a screen or so before they come into view.
+    var loader = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var n = +e.target.dataset.n;
+        loader.unobserve(e.target);
+        showCard(e.target, n);
+      });
+    }, { root: feed, rootMargin: '150%' });
+
+    cards.forEach(function (c) { loader.observe(c); });
+    cards[first - 1].scrollIntoView({ block: 'center', inline: 'center' });
+
+    // The slide nearest the middle of the screen is the one being read.
+    var turning = false, ticking = false;
+    function pickCurrent() {
+      ticking = false;
+      if (turning) return;
+      var box = feed.getBoundingClientRect();
+      var cx = box.left + box.width / 2, cy = box.top + box.height / 2;
+      var best = current, bestD = Infinity;
+      cards.forEach(function (c, i) {
+        var r = c.getBoundingClientRect();
+        var d = Math.abs(r.left + r.width / 2 - cx) + Math.abs(r.top + r.height / 2 - cy);
+        if (d < bestD) { bestD = d; best = i + 1; }
+      });
+      if (best === current) return;
+      endStretch();
+      current = best;
+      history.replaceState(null, '', location.pathname + location.search + '#' + best);
+      beginStretch();
+    }
+    feed.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(pickCurrent); }
+    }, { passive: true });
+
+    // Keep the same slide in view when the phone is turned.
+    var settle;
+    window.addEventListener('resize', function () {
+      turning = true;
+      clearTimeout(settle);
+      settle = setTimeout(function () {
+        cards[current - 1].scrollIntoView({ block: 'center', inline: 'center' });
+        setTimeout(function () { turning = false; }, 250);
+      }, 150);
+    });
+  }
+
+  function showCard(card, n) {
+    var img = card.querySelector('img');
+    fetchSlide(n).then(function (src) {
+      img.onload = function () { img.className = 'on'; };
+      img.src = src;
+      if (n === current) beginStretch();
+    }, function (err) {
+      if (err.message === 'expired') return showGate('Please enter your email again.');
+      setTimeout(function () { showCard(card, n); }, 3000);
+    });
   }
 
   function go(n) {
@@ -379,7 +526,7 @@
       $('img').alt = 'Slide ' + n;
       $('img').hidden = false;
       $('loading').hidden = true;
-      drawLinks(n);
+      drawLinks(n, $('hots'));
       beginStretch();
       if (n < count) fetchSlide(n + 1).catch(function () {});
       if (n > 1) fetchSlide(n - 1).catch(function () {});
@@ -389,7 +536,7 @@
     });
   }
 
-  function drawLinks(n) {
+  function drawLinks(n, into) {
     (LINKS[n] || []).forEach(function (l) {
       var a = document.createElement('a');
       a.className = 'hot';
@@ -401,7 +548,7 @@
       a.style.top = l[1] + '%';
       a.style.width = l[2] + '%';
       a.style.height = l[3] + '%';
-      $('hots').appendChild(a);
+      into.appendChild(a);
     });
   }
 
@@ -409,7 +556,7 @@
   // A stretch starts when a slide is on screen and the tab is visible, and ends when
   // the slide changes, the tab is hidden, or the page closes.
   function beginStretch() {
-    if (document.visibilityState === 'visible' && !$('img').hidden && shownAt === null) shownAt = Date.now();
+    if (document.visibilityState === 'visible' && images[current] && shownAt === null) shownAt = Date.now();
   }
 
   function endStretch() {
