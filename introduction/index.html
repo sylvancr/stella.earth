@@ -228,30 +228,34 @@
   }
   .frame img.on { opacity: 1; }
   .frame a.hot { position: absolute; display: block; }
-  @media (orientation: portrait) {
-    .feed {
-      flex-direction: column;
-      gap: 10px;
-      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
-      scroll-snap-type: y proximity;
-    }
-    .card { width: 100%; scroll-snap-align: center; }
+  .feed {
+    flex-direction: row;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
   }
-  @media (orientation: landscape) {
-    .feed {
-      flex-direction: row;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-    }
-    .card {
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      scroll-snap-align: center;
-      scroll-snap-stop: always;
-    }
-    .frame { width: min(100vw, calc(100dvh * 16 / 9)); }
+  .card {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
   }
+  .frame { width: min(100vw, calc(100dvh * 16 / 9)); }
+  .hint {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(28px + env(safe-area-inset-bottom));
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .hint.gone { opacity: 0; }
+  @media (orientation: landscape) { .hint { display: none; } }
 </style>
 </head>
 <body>
@@ -259,7 +263,7 @@
 <section class="gate" id="gate" hidden>
   <form id="gate-form" novalidate>
     <div class="title">Stella Matutina</div>
-    <div class="sub">Introduction for collaborators · Autumn 2026</div>
+    <div class="sub">Introduction for collaborators<br />Autumn 2026</div>
     <label for="email">Enter your email to open the deck.</label>
     <div class="row">
       <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com" required />
@@ -291,6 +295,7 @@
 </section>
 
 <section class="feed" id="feed" hidden></section>
+<div class="hint" id="hint" hidden>Swipe for the next slide</div>
 
 <script>
 (function () {
@@ -428,6 +433,7 @@
     var feed = $('feed');
     feed.innerHTML = '';
     feed.hidden = false;
+    $('hint').hidden = first !== 1;
     current = first;
     var cards = [];
     for (var n = 1; n <= count; n++) {
@@ -473,6 +479,7 @@
         if (d < bestD) { bestD = d; best = i + 1; }
       });
       if (best === current) return;
+      $('hint').className = 'hint gone';
       endStretch();
       current = best;
       history.replaceState(null, '', location.pathname + location.search + '#' + best);
@@ -553,18 +560,39 @@
   }
 
   // ---------- timing ----------
-  // A stretch starts when a slide is on screen and the tab is visible, and ends when
-  // the slide changes, the tab is hidden, or the page closes.
+  // Time counts only while someone is actually there: the slide is on screen, the page is
+  // visible and in focus, and they have touched, scrolled, moved the mouse or pressed a key
+  // within the last minute. A tab left open on the last slide stops counting after that minute.
+  var IDLE_MS = 60000;
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && params.get('idle')) IDLE_MS = +params.get('idle');
+  var lastActive = Date.now();
+
+  function present() {
+    return document.visibilityState === 'visible' && document.hasFocus() && Date.now() - lastActive < IDLE_MS;
+  }
+
   function beginStretch() {
-    if (document.visibilityState === 'visible' && images[current] && shownAt === null) shownAt = Date.now();
+    if (shownAt === null && images[current] && present()) shownAt = Date.now();
   }
 
   function endStretch() {
     if (shownAt === null) return;
-    var seconds = Math.round((Date.now() - shownAt) / 1000);
+    var end = Math.min(Date.now(), lastActive + IDLE_MS);
+    var seconds = Math.round((end - shownAt) / 1000);
     shownAt = null;
     if (seconds >= 1) queue.push({ slide: current, seconds: seconds });
   }
+
+  function active() {
+    lastActive = Date.now();
+    beginStretch();
+  }
+  ['pointerdown', 'pointermove', 'touchstart', 'keydown', 'wheel'].forEach(function (t) {
+    document.addEventListener(t, active, { passive: true, capture: true });
+  });
+  $('feed').addEventListener('scroll', active, { passive: true });
+  window.addEventListener('focus', active);
+  window.addEventListener('blur', function () { endStretch(); flush(false); });
 
   function flush(closing) {
     if (!session || !queue.length) return;
@@ -583,7 +611,7 @@
 
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') { endStretch(); flush(true); }
-    else beginStretch();
+    else active();
   });
   window.addEventListener('pagehide', function () { endStretch(); flush(true); });
   // Send what has built up every half minute, so a crash loses little.
@@ -591,6 +619,10 @@
     if (shownAt !== null) { endStretch(); beginStretch(); }
     flush(false);
   }, 30000);
+  // Close a stretch soon after someone goes idle, rather than waiting for the next send.
+  setInterval(function () {
+    if (shownAt !== null && !present()) endStretch();
+  }, 5000);
 
   // ---------- navigation ----------
   function step(d) { endStretch(); flush(false); go(current + d); }
