@@ -393,7 +393,15 @@
     $('email').focus();
   }
 
-  function start(email) {
+  // Phones get the lighter 1440-pixel slides.
+  var SIZE = PHONE ? 's' : '';
+  function firstSlide() {
+    var h = parseInt((location.hash || '').slice(1), 10);
+    return h >= 1 ? h : 1;
+  }
+
+  // withFirst asks for the opening slide in the same reply, to save a round trip.
+  function start(email, withFirst) {
     $('go').disabled = true;
     $('go').textContent = 'Opening';
     $('error').hidden = true;
@@ -403,13 +411,16 @@
       website: $('website').value,
       ref: params.get('r') || '',
       device: navigator.userAgent,
-      referrer: document.referrer
+      referrer: document.referrer,
+      first: withFirst ? firstSlide() : 0,
+      size: SIZE
     }).then(function (res) {
       $('go').disabled = false;
       $('go').textContent = 'Open';
       if (!res.ok) throw new Error(res.error || 'Please try again.');
       session = res.session;
       count = res.count;
+      if (res.image && withFirst) images[firstSlide()] = res.image;
       store(KEY, email);
       return res;
     }, function () {
@@ -427,7 +438,7 @@
       $('error').hidden = false;
       return;
     }
-    start(email).then(openViewer, function (err) {
+    start(email, true).then(openViewer, function (err) {
       $('error').textContent = err.message;
       $('error').hidden = false;
     });
@@ -438,7 +449,7 @@
   function fetchSlide(n) {
     if (images[n]) return Promise.resolve(images[n]);
     if (pending[n]) return pending[n];
-    pending[n] = post({ action: 'slide', session: session, n: n }).then(function (res) {
+    pending[n] = post({ action: 'slide', session: session, n: n, size: SIZE }).then(function (res) {
       if (res.expired) {
         var email = load(KEY);
         if (!email) throw new Error('expired');
@@ -698,7 +709,7 @@
   var known = load(KEY);
   if (known && (!params.get('e') || params.get('e').toLowerCase() === known.toLowerCase())) {
     $('boot').hidden = false;
-    start(known).then(openViewer, function () { showGate(); });
+    start(known, true).then(openViewer, function () { showGate(); });
   } else {
     showGate();
   }
