@@ -227,6 +227,32 @@
     -webkit-user-drag: none;
   }
   .frame img.on { opacity: 1; }
+  .frame .wait {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ============ LOADING ============ */
+  .wait, .boot {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+  }
+  .wait span, .boot span { animation: pulse 1.4s ease-in-out infinite; }
+  .wait span:nth-child(2), .boot span:nth-child(2) { animation-delay: 0.2s; }
+  .wait span:nth-child(3), .boot span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
+  .boot {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .frame a.hot { position: absolute; display: block; }
   .feed {
     flex-direction: row;
@@ -260,6 +286,8 @@
 </head>
 <body>
 
+<div class="boot" id="boot" hidden>Opening the deck<span>.</span><span>.</span><span>.</span></div>
+
 <section class="gate" id="gate" hidden>
   <form id="gate-form" novalidate>
     <div class="title">Stella Matutina</div>
@@ -277,7 +305,7 @@
 <section class="viewer" id="viewer" hidden>
   <div class="stage" id="stage">
     <div class="slide" id="slide">
-      <div class="loading" id="loading">Loading</div>
+      <div class="loading wait" id="loading">Loading<span>.</span><span>.</span><span>.</span></div>
       <img id="img" alt="" draggable="false" />
       <div class="side prev" id="side-prev" aria-hidden="true"></div>
       <div class="side next" id="side-next" aria-hidden="true"></div>
@@ -339,6 +367,7 @@
   var pending = {};  // slide number -> promise
   var shownAt = null; // when the current slide became visible
   var queue = [];     // timing stretches not yet sent
+  var prefetched = false;
 
   function store(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -356,6 +385,7 @@
   function showGate(message) {
     $('viewer').hidden = true;
     $('feed').hidden = true;
+    $('boot').hidden = true;
     $('gate').hidden = false;
     var saved = params.get('e') || load(KEY) || '';
     if (saved && !$('email').value) $('email').value = saved;
@@ -365,6 +395,7 @@
 
   function start(email) {
     $('go').disabled = true;
+    $('go').textContent = 'Opening';
     $('error').hidden = true;
     return post({
       action: 'start',
@@ -375,6 +406,7 @@
       referrer: document.referrer
     }).then(function (res) {
       $('go').disabled = false;
+      $('go').textContent = 'Open';
       if (!res.ok) throw new Error(res.error || 'Please try again.');
       session = res.session;
       count = res.count;
@@ -382,6 +414,7 @@
       return res;
     }, function () {
       $('go').disabled = false;
+      $('go').textContent = 'Open';
       throw new Error('Could not reach the deck. Please try again.');
     });
   }
@@ -419,8 +452,22 @@
     return pending[n];
   }
 
+  // Fetch every slide in the background, nearest to the open one first, a few at a time.
+  function loadAll(first, task) {
+    var order = [];
+    for (var i = 1; i <= count; i++) order.push(i);
+    order.sort(function (a, b) { return Math.abs(a - first) - Math.abs(b - first) || a - b; });
+    var next = 0;
+    function worker() {
+      if (next >= order.length) return;
+      return task(order[next++]).then(worker, worker);
+    }
+    for (var k = 0; k < 3; k++) worker();
+  }
+
   function openViewer() {
     $('gate').hidden = true;
+    $('boot').hidden = true;
     var fromHash = parseInt((location.hash || '').slice(1), 10);
     var first = fromHash >= 1 && fromHash <= count ? fromHash : 1;
     if (PHONE) return openFeed(first);
@@ -442,6 +489,10 @@
       card.dataset.n = n;
       var frame = document.createElement('div');
       frame.className = 'frame';
+      var wait = document.createElement('div');
+      wait.className = 'wait';
+      wait.innerHTML = 'Loading<span>.</span><span>.</span><span>.</span>';
+      frame.appendChild(wait);
       var img = document.createElement('img');
       img.alt = 'Slide ' + n;
       img.draggable = false;
@@ -452,17 +503,7 @@
       cards.push(card);
     }
 
-    // Load slides a screen or so before they come into view.
-    var loader = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        var n = +e.target.dataset.n;
-        loader.unobserve(e.target);
-        showCard(e.target, n);
-      });
-    }, { root: feed, rootMargin: '150%' });
-
-    cards.forEach(function (c) { loader.observe(c); });
+    loadAll(first, function (n) { return showCard(cards[n - 1], n); });
     cards[first - 1].scrollIntoView({ block: 'center', inline: 'center' });
 
     // The slide nearest the middle of the screen is the one being read.
@@ -503,7 +544,7 @@
 
   function showCard(card, n) {
     var img = card.querySelector('img');
-    fetchSlide(n).then(function (src) {
+    return fetchSlide(n).then(function (src) {
       img.onload = function () { img.className = 'on'; };
       img.src = src;
       if (n === current) beginStretch();
@@ -535,8 +576,10 @@
       $('loading').hidden = true;
       drawLinks(n, $('hots'));
       beginStretch();
-      if (n < count) fetchSlide(n + 1).catch(function () {});
-      if (n > 1) fetchSlide(n - 1).catch(function () {});
+      if (!prefetched) {
+        prefetched = true;
+        loadAll(n, function (m) { return fetchSlide(m); });
+      }
     }, function (err) {
       if (err.message === 'expired') return showGate('Please enter your email again.');
       $('loading').textContent = 'Could not load this slide. Try again.';
@@ -654,6 +697,7 @@
   // Someone who has opened it before on this device goes straight to the slides.
   var known = load(KEY);
   if (known && (!params.get('e') || params.get('e').toLowerCase() === known.toLowerCase())) {
+    $('boot').hidden = false;
     start(known).then(openViewer, function () { showGate(); });
   } else {
     showGate();
