@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<title>Stella Matutina · Introduction</title>
+<style>
+  @font-face {
+    font-family: 'Tofth Grotesk Mono';
+    src: url('../assets/Tofth-Grotesk-Mono.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Tofth Grotesk Semi Mono';
+    src: url('../assets/Tofth-Grotesk-Semi-Mono-Negative-Tracking.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: 'Tofth Grotesk Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+
+  [hidden] { display: none !important; }
+
+  /* ============ EMAIL GATE ============ */
+  .gate {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .gate form {
+    width: 100%;
+    max-width: 420px;
+  }
+  .gate .title {
+    font-family: 'Tofth Grotesk Semi Mono', 'Tofth Grotesk Mono', monospace;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+  }
+  .gate .sub {
+    margin-top: 10px;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+  }
+  .gate label {
+    display: block;
+    margin-top: 40px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.85);
+  }
+  .gate .row {
+    display: flex;
+    margin-top: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+  }
+  .gate input[type=email] {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: #fff;
+    font: inherit;
+    font-size: 16px;
+    padding: 10px 0;
+  }
+  .gate input::placeholder { color: rgba(255,255,255,0.35); }
+  .gate button {
+    background: transparent;
+    border: 0;
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 10px 0 10px 16px;
+    cursor: pointer;
+  }
+  .gate button:disabled { opacity: 0.4; cursor: default; }
+  .gate .note {
+    margin-top: 16px;
+    font-size: 11px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.5);
+  }
+  .gate .error {
+    margin-top: 16px;
+    font-size: 12px;
+    color: #fff;
+  }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+  /* ============ VIEWER ============ */
+  .viewer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .stage {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  /* The slide box keeps 16:9 and fits the space whichever side is tighter. */
+  .slide {
+    position: relative;
+    width: min(100%, calc((100vh - 96px) * 16 / 9));
+    width: min(100%, calc((100dvh - 96px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #111;
+  }
+  .slide img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    -webkit-user-drag: none;
+  }
+  .slide .loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+  .slide a.hot {
+    position: absolute;
+    display: block;
+    cursor: pointer;
+  }
+  .slide a.hot:focus-visible { outline: 1px solid #fff; outline-offset: 2px; }
+  .side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 30%;
+    cursor: pointer;
+  }
+  .side.prev { left: 0; }
+  .side.next { right: 0; }
+
+  .bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 16px calc(16px + env(safe-area-inset-bottom));
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+  }
+  .bar button {
+    background: transparent;
+    border: 0;
+    color: #fff;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    padding: 8px 0;
+    cursor: pointer;
+  }
+  .bar button:disabled { opacity: 0.3; cursor: default; }
+  .bar .count { font-variant-numeric: tabular-nums; }
+  .bar .nav { display: flex; gap: 24px; }
+</style>
+</head>
+<body>
+
+<section class="gate" id="gate" hidden>
+  <form id="gate-form" novalidate>
+    <div class="title">Stella Matutina</div>
+    <div class="sub">Introduction for collaborators · Autumn 2026</div>
+    <label for="email">Enter your email to open the deck.</label>
+    <div class="row">
+      <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com" required />
+      <button type="submit" id="go">Open</button>
+    </div>
+    <input class="hp" type="text" name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+    <p class="note">Stella sees who has opened the deck and how long each slide was viewed.</p>
+    <p class="error" id="error" role="alert" hidden></p>
+  </form>
+</section>
+
+<section class="viewer" id="viewer" hidden>
+  <div class="stage" id="stage">
+    <div class="slide" id="slide">
+      <div class="loading" id="loading">Loading</div>
+      <img id="img" alt="" draggable="false" />
+      <div class="side prev" id="side-prev" aria-hidden="true"></div>
+      <div class="side next" id="side-next" aria-hidden="true"></div>
+      <div id="hots"></div>
+    </div>
+  </div>
+  <div class="bar">
+    <span>Stella Matutina</span>
+    <span class="count" id="count"></span>
+    <span class="nav">
+      <button type="button" id="prev" aria-label="Previous slide">Prev</button>
+      <button type="button" id="next" aria-label="Next slide">Next</button>
+    </span>
+  </div>
+</section>
+
+<script>
+(function () {
+  // The Apps Script web app URL (ends in /exec). Filled in after it is deployed.
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxrI3tKNypquEkAq6G1e9E9Epot_NxO0XdcZc5aTCVgRy8WQ21rCyPaRn0_BlAmGcI/exec';
+  var params = new URLSearchParams(location.search);
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && params.get('api')) ENDPOINT = params.get('api');
+
+  // Link areas copied from the PDF, as percentages of the slide: [left, top, width, height, url].
+  var LINKS = {
+    6: [
+      [6.67, 34.72, 11.04, 2.78, 'https://www.linkedin.com/in/tobias-rees-abb73024/'],
+      [6.67, 42.87, 4.58, 3.06, 'https://berggruen.org/'],
+      [14.01, 42.87, 17.45, 3.06, 'https://berggruen.org/'],
+      [6.67, 51.3, 8.28, 3.06, 'https://research.google/blog/responsible-ai-at-google-research-technology-ai-society-and-culture/'],
+      [14.95, 51.3, 14.69, 3.06, 'https://ai2050.schmidtsciences.org/fellow/tobias-rees/'],
+      [36.41, 34.72, 11.61, 2.78, 'https://www.linkedin.com/in/haley-albert-a54731a7/'],
+      [36.41, 42.87, 10.1, 3.06, 'https://antikythera.org/'],
+      [49.27, 42.87, 7.34, 3.06, 'https://curative.com/'],
+      [36.41, 51.3, 20.21, 3.06, 'https://www.reidhoffman.org/'],
+      [66.09, 34.72, 15.0, 2.78, 'https://www.linkedin.com/in/sylvanr/'],
+      [66.09, 42.87, 11.04, 3.06, 'https://restlessegg.com/'],
+      [66.09, 51.3, 17.5, 3.06, 'https://www.joinef.com/']
+    ],
+    7: [
+      [51.35, 91.02, 4.64, 3.06, 'https://sarahdrinkwater.substack.com/p/stella-july-2026'],
+      [57.81, 91.02, 4.58, 3.06, 'https://nationofartisans.substack.com/p/artisanal-intelligence-at-stella'],
+      [66.98, 91.02, 4.64, 3.06, 'https://theonebodyproblem.substack.com/p/stella-matutina']
+    ]
+  };
+
+  var KEY = 'stella-deck-email';
+  var $ = function (id) { return document.getElementById(id); };
+
+  var session = null;
+  var count = 0;
+  var current = 1;
+  var images = {};   // slide number -> data URL
+  var pending = {};  // slide number -> promise
+  var shownAt = null; // when the current slide became visible
+  var queue = [];     // timing stretches not yet sent
+
+  function store(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  function post(body, keepalive) {
+    return fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(body),
+      keepalive: !!keepalive
+    }).then(function (r) { return r.json(); });
+  }
+
+  // ---------- gate ----------
+  function showGate(message) {
+    $('viewer').hidden = true;
+    $('gate').hidden = false;
+    var saved = params.get('e') || load(KEY) || '';
+    if (saved && !$('email').value) $('email').value = saved;
+    if (message) { $('error').textContent = message; $('error').hidden = false; }
+    $('email').focus();
+  }
+
+  function start(email) {
+    $('go').disabled = true;
+    $('error').hidden = true;
+    return post({
+      action: 'start',
+      email: email,
+      website: $('website').value,
+      ref: params.get('r') || '',
+      device: navigator.userAgent,
+      referrer: document.referrer
+    }).then(function (res) {
+      $('go').disabled = false;
+      if (!res.ok) throw new Error(res.error || 'Please try again.');
+      session = res.session;
+      count = res.count;
+      store(KEY, email);
+      return res;
+    }, function () {
+      $('go').disabled = false;
+      throw new Error('Could not reach the deck. Please try again.');
+    });
+  }
+
+  $('gate-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var email = $('email').value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      $('error').textContent = 'Please enter a valid email address.';
+      $('error').hidden = false;
+      return;
+    }
+    start(email).then(openViewer, function (err) {
+      $('error').textContent = err.message;
+      $('error').hidden = false;
+    });
+  });
+
+  // ---------- slides ----------
+  // A session lasts a few hours. If it has lapsed, start a new one with the saved email.
+  function fetchSlide(n) {
+    if (images[n]) return Promise.resolve(images[n]);
+    if (pending[n]) return pending[n];
+    pending[n] = post({ action: 'slide', session: session, n: n }).then(function (res) {
+      if (res.expired) {
+        var email = load(KEY);
+        if (!email) throw new Error('expired');
+        return start(email).then(function () { delete pending[n]; return fetchSlide(n); });
+      }
+      if (!res.ok) throw new Error(res.error || 'Could not load the slide.');
+      images[n] = res.image;
+      return res.image;
+    });
+    pending[n].catch(function () { delete pending[n]; });
+    return pending[n];
+  }
+
+  function openViewer() {
+    $('gate').hidden = true;
+    $('viewer').hidden = false;
+    var fromHash = parseInt((location.hash || '').slice(1), 10);
+    go(fromHash >= 1 && fromHash <= count ? fromHash : 1);
+  }
+
+  function go(n) {
+    if (n < 1 || n > count) return;
+    if (n !== current) endStretch();
+    current = n;
+    $('count').textContent = n + ' / ' + count;
+    $('prev').disabled = n === 1;
+    $('next').disabled = n === count;
+    $('side-prev').hidden = n === 1;
+    $('side-next').hidden = n === count;
+    history.replaceState(null, '', location.pathname + location.search + '#' + n);
+
+    $('img').hidden = true;
+    $('loading').hidden = false;
+    $('hots').innerHTML = '';
+    fetchSlide(n).then(function (src) {
+      if (current !== n) return;
+      $('img').src = src;
+      $('img').alt = 'Slide ' + n;
+      $('img').hidden = false;
+      $('loading').hidden = true;
+      drawLinks(n);
+      beginStretch();
+      if (n < count) fetchSlide(n + 1).catch(function () {});
+      if (n > 1) fetchSlide(n - 1).catch(function () {});
+    }, function (err) {
+      if (err.message === 'expired') return showGate('Please enter your email again.');
+      $('loading').textContent = 'Could not load this slide. Try again.';
+    });
+  }
+
+  function drawLinks(n) {
+    (LINKS[n] || []).forEach(function (l) {
+      var a = document.createElement('a');
+      a.className = 'hot';
+      a.href = l[4];
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.setAttribute('aria-label', l[4].replace(/^https:\/\/(www\.)?/, ''));
+      a.style.left = l[0] + '%';
+      a.style.top = l[1] + '%';
+      a.style.width = l[2] + '%';
+      a.style.height = l[3] + '%';
+      $('hots').appendChild(a);
+    });
+  }
+
+  // ---------- timing ----------
+  // A stretch starts when a slide is on screen and the tab is visible, and ends when
+  // the slide changes, the tab is hidden, or the page closes.
+  function beginStretch() {
+    if (document.visibilityState === 'visible' && !$('img').hidden && shownAt === null) shownAt = Date.now();
+  }
+
+  function endStretch() {
+    if (shownAt === null) return;
+    var seconds = Math.round((Date.now() - shownAt) / 1000);
+    shownAt = null;
+    if (seconds >= 1) queue.push({ slide: current, seconds: seconds });
+  }
+
+  function flush(closing) {
+    if (!session || !queue.length) return;
+    var body = { action: 'time', session: session, segments: queue.splice(0, queue.length) };
+    if (closing && navigator.sendBeacon) {
+      navigator.sendBeacon(ENDPOINT, new Blob([JSON.stringify(body)], { type: 'text/plain;charset=utf-8' }));
+    } else {
+      post(body, closing).then(function (res) {
+        if (res && res.expired) {
+          var email = load(KEY);
+          if (email) start(email).then(function () { body.session = session; post(body); });
+        }
+      }).catch(function () { queue = body.segments.concat(queue); });
+    }
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') { endStretch(); flush(true); }
+    else beginStretch();
+  });
+  window.addEventListener('pagehide', function () { endStretch(); flush(true); });
+  // Send what has built up every half minute, so a crash loses little.
+  setInterval(function () {
+    if (shownAt !== null) { endStretch(); beginStretch(); }
+    flush(false);
+  }, 30000);
+
+  // ---------- navigation ----------
+  function step(d) { endStretch(); flush(false); go(current + d); }
+  $('prev').addEventListener('click', function () { step(-1); });
+  $('next').addEventListener('click', function () { step(1); });
+  $('side-prev').addEventListener('click', function () { step(-1); });
+  $('side-next').addEventListener('click', function () { step(1); });
+
+  document.addEventListener('keydown', function (ev) {
+    var k = ev.key;
+    if ($('viewer').hidden) return;
+    if ((k === 'Enter' || k === ' ') && /^(A|BUTTON)$/.test(ev.target.tagName)) return;
+    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ' || k === 'Enter') { ev.preventDefault(); step(1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { ev.preventDefault(); step(-1); }
+    else if (k === 'Home') { ev.preventDefault(); step(1 - current); }
+    else if (k === 'End') { ev.preventDefault(); step(count - current); }
+  });
+
+  var touchX = null;
+  $('stage').addEventListener('touchstart', function (ev) { touchX = ev.touches[0].clientX; }, { passive: true });
+  $('stage').addEventListener('touchend', function (ev) {
+    if (touchX === null) return;
+    var dx = ev.changedTouches[0].clientX - touchX;
+    touchX = null;
+    if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+  });
+
+  // ---------- begin ----------
+  // Someone who has opened it before on this device goes straight to the slides.
+  var known = load(KEY);
+  if (known && (!params.get('e') || params.get('e').toLowerCase() === known.toLowerCase())) {
+    start(known).then(openViewer, function () { showGate(); });
+  } else {
+    showGate();
+  }
+})();
+</script>
+</body>
+</html>
