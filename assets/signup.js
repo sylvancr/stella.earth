@@ -5,6 +5,7 @@
 (function () {
   // The Apps Script web app URL (ends in /exec). Filled in after it is deployed.
   var ENDPOINT = '';
+  if (!ENDPOINT) return; // stays hidden until the backend is deployed
 
   var css = [
     '.signup { position: fixed; left: 42px; bottom: 38px; z-index: 4; color: #fff;',

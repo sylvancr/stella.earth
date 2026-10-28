@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+<base target="_top">
+<style>
+  @font-face {
+    font-family: 'Tofth Grotesk Mono';
+    src: url('https://stella.earth/assets/Tofth-Grotesk-Mono.ttf') format('truetype');
+    font-display: swap;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; background: #000; color: #fff; }
+  body {
+    font-family: 'Tofth Grotesk Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    -webkit-font-smoothing: antialiased;
+    padding: 38px 42px;
+  }
+  .title { font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase; margin-bottom: 48px; }
+  .title a { color: #fff; text-decoration: none; }
+  p { font-size: 13px; line-height: 1.65; max-width: 420px; color: rgba(255,255,255,0.92); }
+  p + p, p + button { margin-top: 20px; }
+  button {
+    background: none; border: none; padding: 0; color: #fff; cursor: pointer;
+    font: inherit; font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 12px; opacity: 0.9;
+    transition: opacity 0.2s ease, gap 0.25s ease;
+  }
+  button::after { content: ''; width: 22px; height: 1px; background: rgba(255,255,255,0.75); transition: width 0.25s ease; }
+  button:hover { opacity: 1; gap: 16px; }
+  button:hover::after { width: 32px; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  @media (max-width: 600px) { body { padding: 24px 22px; } }
+</style>
+</head>
+<body>
+  <div class="title"><a href="https://stella.earth">Stella Matutina</a></div>
+  <? if (valid) { ?>
+    <div id="ask">
+      <p>Unsubscribe <?= email ?> from Stella Matutina emails?</p>
+      <button id="go" type="button">Unsubscribe</button>
+    </div>
+    <p id="done" hidden>You have been unsubscribed. You can sign up again any time at stella.earth.</p>
+    <p id="err" hidden>Something went wrong. Please write to info@stella.earth and we will remove you.</p>
+    <script>
+      var email = <?!= JSON.stringify(email) ?>;
+      var token = <?!= JSON.stringify(token) ?>;
+      document.getElementById('go').addEventListener('click', function () {
+        this.disabled = true;
+        google.script.run
+          .withSuccessHandler(function () {
+            document.getElementById('ask').hidden = true;
+            document.getElementById('done').hidden = false;
+          })
+          .withFailureHandler(function () {
+            document.getElementById('ask').hidden = true;
+            document.getElementById('err').hidden = false;
+          })
+          .unsubscribe(email, token);
+      });
+    </script>
+  <? } else { ?>
+    <p>This unsubscribe link is not valid. Please write to info@stella.earth and we will remove you.</p>
+  <? } ?>
+</body>
+</html>
