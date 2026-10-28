@@ -25,7 +25,7 @@ var FROM = 'info@stella.earth';
 var SENDER_NAME = 'Stella Matutina';
 var SUBJECT = 'Thank you for staying connected';
 
-// "Read these write-ups from Sarah, Louis and Libby."
+// "…read about Stella's summer, written up by Sarah, Louis and Libby."
 var WRITE_UPS = [
   { name: 'Sarah', url: 'https://sarahdrinkwater.substack.com/p/stella-july-2026' },
   { name: 'Louis', url: 'https://nationofartisans.substack.com/p/artisanal-intelligence-at-stella' },
@@ -139,9 +139,9 @@ function sendThanks_(email) {
   var unsub = unsubscribeUrl_(email);
   var names = WRITE_UPS.map(function (w) { return w.name; });
   var text = [
-    'Thank you for staying connected with Stella Matutina.',
+    'You’re now on the Stella Matutina mailing list, and we’ll be sending updates soon.',
     '',
-    'Read these write-ups from ' + names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] + ':',
+    'In the meantime, read about Stella’s summer, written up by ' + names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] + ':',
     ''
   ].concat(WRITE_UPS.map(function (w) { return w.name + ': ' + w.url; })).concat([
     '',
@@ -160,8 +160,8 @@ function sendThanks_(email) {
   var html =
     '<div style="' + font + 'font-size:13px;line-height:1.65;color:#111;max-width:480px;">' +
     '<p style="margin:0 0 20px;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;">Stella Matutina</p>' +
-    '<p style="margin:0 0 14px;">Thank you for staying connected.</p>' +
-    '<p style="margin:0 0 14px;">Read these write-ups from ' + linked + '.</p>' +
+    '<p style="margin:0 0 14px;">You’re now on the Stella Matutina mailing list, and we’ll be sending updates soon.</p>' +
+    '<p style="margin:0 0 14px;">In the meantime, read about Stella’s summer, written up by ' + linked + '.</p>' +
     '<p style="margin:28px 0 0;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;">' +
     'Hertenstein, Lake Lucerne · <a href="https://stella.earth" style="color:#777;">stella.earth</a> · ' +
     '<a href="' + unsub + '" style="color:#777;">Unsubscribe</a></p>' +
