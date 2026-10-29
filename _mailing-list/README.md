@@ -28,7 +28,18 @@ This folder starts with `_`, so GitHub Pages does not publish it.
   signs up again is put back on the list and the date is cleared.
 - To remove someone by hand, type today's date in their Unsubscribed cell.
 
-## Set up the backend (about 5 minutes, once)
+## Live setup
+
+- Apps Script project: [Stella mailing list](https://script.google.com/d/1KiOOfE79SM9AOde_Ei3KmbYByVN4eNa4NpApUVLjBnxvoyIyTkOlW5M3/edit),
+  attached to the sheet. `.clasp.json` here points at it.
+- Web app (deployment "Stella mailing list"):
+  `https://script.google.com/macros/s/AKfycby5J10zNbXjeEf4mF88yqtsQZyxyhByiUOPRI3otK3-OUvaFBpki0aZf_adHLd0FjMu/exec`
+- Update from this folder with [clasp](https://github.com/google/clasp):
+  `clasp push`, `clasp create-version`, then
+  `clasp update-deployment AKfycby5J10zNbXjeEf4mF88yqtsQZyxyhByiUOPRI3otK3-OUvaFBpki0aZf_adHLd0FjMu -V <version>`
+  so the URL stays the same.
+
+## Set up the backend by hand (original steps)
 
 The emails come from the account that deploys, so either:
 - deploy while signed in as **info@stella.earth**, or
