@@ -13,7 +13,7 @@ sheet (Drive › Contacts) and sends one thank-you email from info@stella.earth:
 > Warm regards,
 > Your Friends at Stella
 
-Subject: “Successfully connected to Stella Matutina”.
+Subject: “Successful Stella Connection”.
 
 This folder starts with `_`, so GitHub Pages does not publish it.
 

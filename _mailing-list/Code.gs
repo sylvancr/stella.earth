@@ -23,7 +23,7 @@ var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby5J10zNbXjeEf4mF88yq
 
 var FROM = 'info@stella.earth';
 var SENDER_NAME = 'Stella Matutina';
-var SUBJECT = 'Successfully connected to Stella Matutina';
+var SUBJECT = 'Successful Stella Connection';
 
 // "…read about Stella's summer, written up here, here and here."
 // Names are kept for reference only; the email links each "here".
