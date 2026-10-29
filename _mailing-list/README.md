@@ -5,6 +5,8 @@ web app (`Code.gs` + `Unsubscribe.html`). The script adds each new address to
 the [Stella mailing list](https://docs.google.com/spreadsheets/d/15dFKkvGaMw-iPr8LrtvJpqGXOQy6epfc26YdutYwNUU/edit)
 sheet (Drive › Contacts) and sends one thank-you email from info@stella.earth:
 
+> Hello,
+>
 > You’re now on the Stella Matutina mailing list, and we’ll be sending updates soon.
 > In the meantime, read about Stella’s summer, written up here, here and here.
 >

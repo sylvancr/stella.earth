@@ -139,6 +139,8 @@ function secret_() {
 function sendThanks_(email) {
   var unsub = unsubscribeUrl_(email);
   var text = [
+    'Hello,',
+    '',
     'You’re now on the Stella Matutina mailing list, and we’ll be sending updates soon.',
     '',
     'In the meantime, read about Stella’s summer, written up here:',
@@ -149,7 +151,7 @@ function sendThanks_(email) {
     'Your Friends at Stella',
     '',
     '—',
-    'Hertenstein, Lake Lucerne · https://stella.earth',
+    'https://stella.earth',
     'Unsubscribe: ' + unsub
   ]).join('\n');
 
@@ -160,12 +162,12 @@ function sendThanks_(email) {
   var font = "font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;";
   var html =
     '<div style="' + font + 'font-size:13px;line-height:1.65;color:#111;max-width:480px;">' +
-    '<p style="margin:0 0 20px;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;">Stella Matutina</p>' +
+    '<p style="margin:0 0 14px;">Hello,</p>' +
     '<p style="margin:0 0 14px;">You’re now on the Stella Matutina mailing list, and we’ll be sending updates soon.</p>' +
     '<p style="margin:0 0 14px;">In the meantime, read about Stella’s summer, written up ' + linked + '.</p>' +
     '<p style="margin:20px 0 0;">Warm regards,<br>Your Friends at Stella</p>' +
     '<p style="margin:28px 0 0;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;">' +
-    'Hertenstein, Lake Lucerne · <a href="https://stella.earth" style="color:#777;">stella.earth</a> · ' +
+    '<a href="https://stella.earth" style="color:#777;">stella.earth</a><br>' +
     '<a href="' + unsub + '" style="color:#777;">Unsubscribe</a></p>' +
     '</div>';
 
