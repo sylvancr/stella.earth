@@ -6,7 +6,9 @@ the [Stella mailing list](https://docs.google.com/spreadsheets/d/15dFKkvGaMw-iPr
 sheet (Drive › Contacts) and sends one thank-you email from info@stella.earth:
 
 > You’re now on the Stella Matutina mailing list, and we’ll be sending updates soon.
-> In the meantime, read about Stella’s summer, written up by Sarah, Louis and Libby.
+> In the meantime, read about Stella’s summer, written up here, here and here.
+
+Subject: “Successfully connected to Stella Matutina”.
 
 This folder starts with `_`, so GitHub Pages does not publish it.
 
