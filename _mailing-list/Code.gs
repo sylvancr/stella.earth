@@ -19,7 +19,7 @@ var SHEET_ID = '15dFKkvGaMw-iPr8LrtvJpqGXOQy6epfc26YdutYwNUU';
 
 // The web app URL (ends in /exec), filled in after the first deployment.
 // Used for unsubscribe links; if empty, the script asks Apps Script for it.
-var WEB_APP_URL = '';
+var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby5J10zNbXjeEf4mF88yqtsQZyxyhByiUOPRI3otK3-OUvaFBpki0aZf_adHLd0FjMu/exec';
 
 var FROM = 'info@stella.earth';
 var SENDER_NAME = 'Stella Matutina';

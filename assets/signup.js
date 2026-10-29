@@ -4,7 +4,7 @@
 // "Stella mailing list" sheet and sends the thank-you email.
 (function () {
   // The Apps Script web app URL (ends in /exec). Filled in after it is deployed.
-  var ENDPOINT = '';
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycby5J10zNbXjeEf4mF88yqtsQZyxyhByiUOPRI3otK3-OUvaFBpki0aZf_adHLd0FjMu/exec';
   if (!ENDPOINT) return; // stays hidden until the backend is deployed
 
   var css = [
