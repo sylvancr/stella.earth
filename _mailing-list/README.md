@@ -7,6 +7,9 @@ sheet (Drive › Contacts) and sends one thank-you email from info@stella.earth:
 
 > You’re now on the Stella Matutina mailing list, and we’ll be sending updates soon.
 > In the meantime, read about Stella’s summer, written up here, here and here.
+>
+> Warm regards,
+> Your Friends at Stella
 
 Subject: “Successfully connected to Stella Matutina”.
 

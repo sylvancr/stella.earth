@@ -145,10 +145,11 @@ function sendThanks_(email) {
     ''
   ].concat(WRITE_UPS.map(function (w) { return w.url; })).concat([
     '',
-    'Stella Matutina',
-    'Hertenstein, Lake Lucerne',
-    'https://stella.earth',
+    'Warm regards,',
+    'Your Friends at Stella',
     '',
+    '—',
+    'Hertenstein, Lake Lucerne · https://stella.earth',
     'Unsubscribe: ' + unsub
   ]).join('\n');
 
@@ -162,6 +163,7 @@ function sendThanks_(email) {
     '<p style="margin:0 0 20px;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;">Stella Matutina</p>' +
     '<p style="margin:0 0 14px;">You’re now on the Stella Matutina mailing list, and we’ll be sending updates soon.</p>' +
     '<p style="margin:0 0 14px;">In the meantime, read about Stella’s summer, written up ' + linked + '.</p>' +
+    '<p style="margin:20px 0 0;">Warm regards,<br>Your Friends at Stella</p>' +
     '<p style="margin:28px 0 0;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;">' +
     'Hertenstein, Lake Lucerne · <a href="https://stella.earth" style="color:#777;">stella.earth</a> · ' +
     '<a href="' + unsub + '" style="color:#777;">Unsubscribe</a></p>' +
